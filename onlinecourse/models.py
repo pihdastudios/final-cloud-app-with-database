@@ -95,6 +95,19 @@ class Enrollment(models.Model):
     rating = models.FloatField(default=5.0)
 
 
+class Question(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    grade = models.IntegerField(default=0)
+    text = models.CharField(max_length=1000)
+
+    def is_get_score(self, selected_ids):
+        all_answers = self.choice_set.filter(is_correct=True).count()
+        selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
+        if all_answers == selected_correct:
+            return True
+        else:
+            return False
+
 # <HINT> Create a Question Model with:
     # Used to persist question content for a course
     # Has a One-To-Many (or Many-To-Many if you want to reuse questions) relationship with course
@@ -116,6 +129,11 @@ class Enrollment(models.Model):
     #        return False
 
 
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    text = models.CharField(max_length=200, default="question text")
+    is_correct = models.BooleanField(default=False)
+
 #  <HINT> Create a Choice Model with:
     # Used to persist choice content for a question
     # One-To-Many (or Many-To-Many if you want to reuse choices) relationship with Question
@@ -123,6 +141,11 @@ class Enrollment(models.Model):
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
 # class Choice(models.Model):
+
+
+class Submission(models.Model):
+   enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+   choices = models.ManyToManyField(Choice)
 
 # <HINT> The submission model
 # One enrollment could have multiple submission
